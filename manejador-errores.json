@@ -1,0 +1,98 @@
+{
+  "name": "Manejador de errores - Hipócrates",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "da8ca5d2-6452-4143-ba58-56804d96bfdd",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"timestamp\": \"{{ $now.toISO() }}\",\n  \"workflow\": \"{{ $json.workflow?.name || 'Workflow desconocido' }}\",\n  \"execution_id\": \"{{ $json.execution?.id || 'Sin ID' }}\",\n  \"nodo_fallido\": \"{{ $json.execution?.lastNodeExecuted || 'No identificado' }}\",\n  \"mensaje_error\": \"{{ $json.execution?.error?.message || $json.error?.message || 'Error sin descripción' }}\",\n  \"execution_url\": \"{{ $json.execution?.url || 'URL no disponible' }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e96e7f09-f2c8-4d80-8a38-a62b4a0e7e4f",
+      "name": "Preparar alerta de error"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C4CGYPZKR",
+          "mode": "list",
+          "cachedResultName": "todo-ejercicios-coder"
+        },
+        "text": "={{ '🚨 ERROR EN AGENTE HIPÓCRATES\\n\\nWorkflow: ' + $json.workflow + '\\nNodo: ' + $json.nodo_fallido + '\\nError: ' + $json.mensaje_error + '\\nEjecución: ' + $json.execution_id + '\\nFecha: ' + $json.timestamp + '\\nEnlace: ' + $json.execution_url }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        448,
+        0
+      ],
+      "id": "749d3901-e949-4556-9d72-c64bae6e5178",
+      "name": "Notificar error en Slack",
+      "webhookId": "757ac824-32de-4c51-bb15-3d20f67c2e36",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "aoft8eIaSOQQfYIT",
+          "name": "Slack account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Preparar alerta de error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar alerta de error": {
+      "main": [
+        [
+          {
+            "node": "Notificar error en Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0a7f6d7d-2854-40fe-9d5b-21d03adbdeee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9b68b0e8a456dff9923effb5a0ae1c7165e89a8f14a80e15946776334589b09b"
+  },
+  "nodeGroups": [],
+  "id": "QJz9xPfcLZFlhQGK",
+  "tags": []
+}
